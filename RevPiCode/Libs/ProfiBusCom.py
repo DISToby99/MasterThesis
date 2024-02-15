@@ -1,5 +1,70 @@
 import revpimodio2
 import struct
+import numpy  as np
+import ProfiBusCom as profi
+
+class SendAndGet():
+      def __init__(self):
+            self.com = ProfiBusCom()
+            self.get = ProfiBusGet(self.com)
+            self.send = ProfiBusSend(self.com)
+
+
+
+
+      def ReciveData(self):
+          OnOff =  self.get.GetValue(port=1, type='bool') 
+          StartEstimation = OnOff[0]
+          StartMPC = OnOff[1]
+
+          POLF_SP09 = self.get.GetValue(port=8, type='real')
+          POLF_SP09 = np.round(POLF_SP09,3) 
+
+          FOR_QT03 = self.get.GetValue(port=16, type='real')
+          FOR_QT03 = np.round(FOR_QT03,3)
+          
+          TRS5_FT01 = self.get.GetValue(port=20, type='real')
+          TRS5_FT01 = np.round(TRS5_FT01,3)
+          
+          TRS5_FT02 = self.get.GetValue(port=24, type='real')
+          TRS5_FT02 = np.round(TRS5_FT02,3)
+          
+          POLF_FT09 = self.get.GetValue(port=28, type='real')
+          POLF_FT09 = np.round(POLF_FT09,3)
+
+          PHA18_SED18_QB01 = self.get.GetValue(port=4, type='real')
+          PHA18_SED18_QB01 = np.round(PHA18_SED18_QB01,3)
+          
+      
+          storeArray = self.makeArray5x1(FOR_QT03, TRS5_FT01, TRS5_FT02, POLF_FT09, PHA18_SED18_QB01)
+          return storeArray, StartEstimation, StartMPC, POLF_SP09
+          
+ 
+      def SendData(self, FOR_TRS5_QB01, POLF_SP09, AlarmList):  
+          #FOR_TRS5_QB01 = CSV.OpenCSV()
+          self.send.SendValue(FOR_TRS5_QB01, port=8, type='real')
+          self.send.SendValue(POLF_SP09, port=12, type='real')
+          self.send.SendValue(AlarmList, port=1, type='bool')
+
+      def makeArray5x1(self, value1, value2, value3, value4, value5):
+          npArray = np.array([value1, value2, value3, value4, value5])
+          return npArray
+
+      
+class EdgeTrigger:
+    def __init__(self):
+        self.prev_state = False
+
+    def rising_edge(self, current_state):
+        edge = current_state and not self.prev_state
+        self.prev_state = current_state
+        return edge
+
+    def falling_edge(self, current_state):
+        edge = not current_state and self.prev_state
+        self.prev_state = current_state
+        return edge
+
 
 class ProfiBusCom:
     def __init__(self):
@@ -19,14 +84,9 @@ class ProfiBusGet:
             return 'NaN'
         elif port == 3:
             return 'NaN'
-        elif port == 4:
-            return 'NaN'
-        elif port == 5:
-            return 'NaN'
-        elif port == 6:
-            return 'NaN'
-        elif port == 7:
-            return 'NaN'
+        elif port == 4 and type=='real':
+            b1, b2, b3, b4 = self.In4to7()
+            Value = self.Convert4bToReal(b1,b2,b3,b4)
         elif port == 8 and type=='real':
             b1, b2, b3, b4 = self.In8to11()
             Value = self.Convert4bToReal(b1,b2,b3,b4)
@@ -76,14 +136,20 @@ class ProfiBusGet:
             # Unpack the byte string as a float
             float_value = struct.unpack('<f', byte_string)[0]
 
-            # Print the float value
-            #print(float_value)
             return float_value
 
 
     def In1(self):
         b1 = self.rpi.io.Input__1.value 
         return b1 
+    
+    def In4to7(self):
+        # Read 4 bytes from the input register
+        b1 = self.rpi.io.Input__4.value
+        b2 = self.rpi.io.Input__5.value
+        b3 = self.rpi.io.Input__6.value
+        b4 = self.rpi.io.Input__7.value
+        return b1, b2, b3, b4
     
     def In8to11(self):
         # Read 4 bytes from the input register
@@ -132,30 +198,49 @@ class ProfiBusSend:
 
     def SendValue(self, Value, port, type):
         if port == 1 and type=='bool':
-            return 'NaN'    
-        elif port == 2:
-            return 'NaN'
-        elif port == 3:
-            return 'NaN'
-        elif port == 4:
-            return 'NaN'
-        elif port == 5:
-            return 'NaN'
-        elif port == 6:
-            return 'NaN'
-        elif port == 7:
-            return 'NaN'
+            Byte = self.BinaryToBit(Value)
+            self.Out1(Byte)
         elif port == 8 and type=='real':
             Bytes = self.ConvertRealTo4b(Value)
-            Value = self.Out8to11(Bytes)
+            self.Out8to11(Bytes)
+        elif port == 12 and type=='real':
+            Bytes = self.ConvertRealTo4b(Value)
+            self.Out12to15(Bytes)
+
+    def BinaryToBit(self, binary_string):
+        # Initialize an empty list to store the individual bits
+        bit_list = []
+
+        # Iterate over the binary string and convert each character to a boolean value
+        for bit in binary_string:
+            bit_list.append(bit)
+
+        # Ensure that the bit list has 8 elements by padding with False if necessary
+        while len(bit_list) < 8:
+            bit_list.append(False)
         
-        return Value 
-    
+        bit_list = bit_list[::-1]
+
+        byte_value = 0
+        # Iterate over the bit list and set the corresponding bit in the byte value
+        for i, bit in enumerate(bit_list):
+            if bit:
+                byte_value |= 1 << (7 - i)  # Set the bit at position 7 - i (MSB to LSB)
+
+ 
+        # Return the individual bits as a tuple
+        return byte_value
+
+
     def ConvertRealTo4b(self, float_value):
         # Pack the float value into a binary string
         byte_string = struct.pack('<f', float_value)
         
         return byte_string
+    
+    def Out1(self, byte):
+        self.rpi.io.Output__1.value = byte
+
 
     def Out8to11(self, byte_string):
         #Divieds the string into 4 bytes
@@ -165,3 +250,12 @@ class ProfiBusSend:
         self.rpi.io.Output__9.value = data3
         self.rpi.io.Output__10.value = data2
         self.rpi.io.Output__11.value = data1
+
+    def Out12to15(self, byte_string):
+        #Divieds the string into 4 bytes
+        data1, data2, data3, data4 = byte_string
+
+        self.rpi.io.Output__12.value = data4
+        self.rpi.io.Output__13.value = data3
+        self.rpi.io.Output__14.value = data2
+        self.rpi.io.Output__15.value = data1

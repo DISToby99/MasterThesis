@@ -61,8 +61,8 @@ for index, row in data.iterrows():
             else:
                 change3 = abs(1-change3)
             TS3[index - start] = TS3[index - start] * change
-            change = (change1/5+0*change3/8+change2/9)+1
-            #print(change)
+            change = (change1/5+1*change3/8+change2/9)+1
+            print(change)
         else:
             TS3[index - start] = TS3[index - start]  # Set to the previous value if not enough previous samples
 
@@ -81,59 +81,12 @@ df2 = pd.DataFrame(DB1, columns=['QB02'])
 df = pd.DataFrame(TS, columns=['QB01'])
 
 data = pd.concat([data, df], axis=1)
+data = data.drop(['TRS5_RV01'], axis=1)
 
-data.plot(x="Time", 
-          subplots=True)
+data.plot(x="Time",
+             subplots=True)
 plt.legend()
-
-
-#%%
-#Legger til når SED har høys TURB
-HighTurb = pd.read_csv('C:/Users/toma/VEAS SELVKOST AS/Torbjørns Masteroppgave - General/Interpolation/HøyTurbDatacsv_.csv', delimiter=';')
-
-start = 0
-stopp = 104
-t = np.arange(stopp - start + 1) + start
-TS = np.zeros(len(t))
-TS[0] = 7
-previous_samples = [None] * 3  # Store the previous three samples
-
-for index, row in HighTurb.iterrows():
-    if index > start:
-        if all(sample is not None for sample in previous_samples):  # Check if all elements are not None
-            change = row['FOR_QT03'] / previous_samples[0]['FOR_QT03']
-            TS[index - start] = TS[index - start - 1] * change
-        else:
-            TS[index - start] = TS[index - start - 1]  # Set to the previous value if not enough previous samples
-            
-    # Update the previous samples
-    previous_samples.pop(0)  # Remove the oldest previous sample
-    previous_samples.append(row)  # Add the current row as the newest previous sample
-    
-for index, row in HighTurb.iterrows():
-    if index > start+75:
-        if all(sample is not None for sample in previous_samples):  # Check if all elements are not None
-            change = row['PHA18_SED18_QB01'] / previous_samples[0]['PHA18_SED18_QB01']
-            TS[index - start] = TS[index - start - 1] * change**-1
-            print(change)
-        else:
-            TS[index - start] = TS[index - start - 1]  # Set to the previous value if not enough previous samples
-            
-    # Update the previous samples
-    previous_samples.pop(0)  # Remove the oldest previous sample
-    previous_samples.append(row)  # Add the current row as the newest previous sample
-            
-df = pd.DataFrame(TS, columns=['QB01'])
-
-HighTurb = pd.concat([HighTurb, df], axis=1)
-
-# Perform the merge
-merged = pd.concat([HighTurb, data], axis=0)
-
-
-merged.plot(x="Time", 
-          subplots=True)
-plt.legend()
+\
 
 #%%
 #Legg til data fra 03.01.24 til laging av modell
@@ -223,8 +176,11 @@ ds2 = pd.concat([ds, df], axis=1)
 # ds2.plot(x='Time',
 #         subplots=True)
 
+
 # Perform the merge
 merged = pd.concat([ds1, ds2, data], axis=0)
+
+merged = merged.drop(['TRS5_RV01'], axis=1)
 
 merged.plot(x="Time", 
           subplots=True)

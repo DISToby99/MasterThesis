@@ -79,6 +79,20 @@ class ModellEstimation:
         self.NewSampleInY(min(max(y_hat[[4]],x[0,3]),12))
         #print(y_hat[[4]])
         return max(y_hat[[4]],x[0,3])
+    
+    def EstimateWithCalculatedDelay(self):
+        y = self.y
+        x1 = self.x[:,0]
+        x2 = self.x[:,1]
+        x3 = self.x[:,2]
+        x4 = self.x[:,3]*0.14
+        x5 = self.x[:,4]
+        k=10
+        y_hat = 1.0239*y[k-1] + -1.4126E-3*x2[k-1]*x1[k-6]*y[k-1] + 1.6950E-01*x4[k-4]*x1[k-6]**2 + \
+                -3.3035E-04*x5[k-10]*y[k-1]**2 + 2.7617E-04*x5[k-10]*y[k-1]**2 
+        
+        self.NewSampleInY(y_hat)
+        return y_hat
         
         
 
