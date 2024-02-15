@@ -1,0 +1,191 @@
+;============================================================
+; Profibus Device Database of :
+; KUNBUS-GW PROFIBUS
+; History :
+; $Id: KUBU0F4F.GSD 11394 2015-11-30 10:35:42Z dconzelmann $
+;============================================================
+#Profibus_DP
+
+; General Keys
+;--------------
+
+GSD_Revision=3
+
+; Device identification
+Vendor_Name="KUNBUS GmbH"     ;
+Model_Name="KUNBUS-GW PROFIBUS"
+Revision="V1.0"               ;
+Ident_Number=0x0F4F           ;
+Protocol_Ident=0              ; DP protocol
+Station_Type=0                ; Slave device
+FMS_supp=0                    ; FMS not supported
+Hardware_Release="R01"        ;
+Software_Release="1.0"        ;
+
+; Supported baudrates
+9.6_supp            =1
+19.2_supp           =1
+45.45_supp          =1
+93.75_supp          =1
+187.5_supp          =1
+500_supp            =1
+1.5M_supp           =1
+3M_supp             =1
+6M_supp             =1
+12M_supp            =1
+
+; Maximum responder time for supported baudrates (TSDR)
+MaxTsdr_9.6=15                ; min 15
+MaxTsdr_19.2=15               ; min 15
+MaxTsdr_45.45=15              ; min 15
+MaxTsdr_93.75=15              ; min 15
+MaxTsdr_187.5=15              ; min 15
+MaxTsdr_500=15                ; min 15
+MaxTsdr_1.5M=25               ; min 25
+MaxTsdr_3M=50                 ; min 50
+MaxTsdr_6M=100                ; min 100
+MaxTsdr_12M=200               ; min 200
+
+; Supported hardware features
+Redundancy=0                  ; not supported
+Repeater_Ctrl_Sig=2           ; TTL
+24V_Pins=0                    ; not connected
+
+Implementation_Type = "VPC3+"
+Info_Text="KUNBUS-MOD GATE Profibus"
+
+; Slave Keys
+;------------
+
+; Supported DP features
+Freeze_Mode_supp=1            ; supported
+Sync_Mode_supp=1              ; supported
+Auto_Baud_supp=1              ; supported
+Set_Slave_Add_supp=1          ; supported
+
+; Maximum polling frequency
+Min_Slave_Intervall=1         ; 100 us
+
+; Maximum supported sizes
+Modular_Station=1             ; modular
+
+Max_Module=64                 ; maximum amount of modules
+Modul_Offset=1
+Max_Input_Len=244             ; fieldbus data bytes input
+Max_Output_Len=244            ; fieldbus data bytes output
+Max_Data_Len=488              ; fieldbus data bytes overall
+
+Max_Diag_Data_Len=6           ; 6 Byte default
+
+
+Slave_Family=9@Kunbus         ; Gateway
+
+; Definition of simple module
+
+; ---------- Empty Slot ----------
+Module = "Empty" 0x00         ; Simple Empty
+0
+EndModule
+; ---------- 1 Byte I/O ----------
+Module="Op_01" 0x20           ; Simple Output
+1
+EndModule
+Module="Ip_01" 0x10           ; Simple Input
+6
+EndModule
+Module="IpOp_01" 0x30         ; Simple Input/Output
+11
+EndModule
+; ---------- 2 Byte I/O ----------
+Module="Op_02" 0x21           ; Simple Output
+2
+EndModule
+Module="Ip_02" 0x11           ; Simple Input
+7
+EndModule
+Module="IpOp_02" 0x31         ; Simple Input/Output
+12
+EndModule
+; ---------- 4 Byte I/O ----------
+Module="Op_04" 0x23           ; Simple Output
+3
+EndModule
+Module="Ip_04" 0x13           ; Simple Input
+8
+EndModule
+Module="IpOp_04" 0x33         ; Simple Input/Output
+13
+EndModule
+; ---------- 8 Byte I/O ----------
+Module="Op_08" 0x27           ; Simple Output
+4
+EndModule
+Module="Ip_08" 0x17           ; Simple Input
+9
+EndModule
+Module="IpOp_08" 0x37         ; Simple Input/Output
+14
+EndModule
+; ---------- 16 Byte I/O ----------
+Module="Op_16" 0x2F           ; Simple Output
+5
+EndModule
+Module="Ip_16" 0x1F           ; Simple Input
+10
+EndModule
+Module="IpOp_16" 0x3F         ; Simple Input/Output
+15
+EndModule
+
+; ----------  1 Word I/O ----------
+Module="WOp_01" 0x60           ; Simple Output
+16
+EndModule
+Module="WIp_01" 0x50           ; Simple Input
+21
+EndModule
+Module="WIpOp_01" 0x70         ; Simple Input/Output
+26
+EndModule
+; ---------- 2 Word I/O ----------
+Module="WOp_02" 0x61           ; Simple Output
+17
+EndModule
+Module="WIp_02" 0x51           ; Simple Input
+22
+EndModule
+Module="WIpOp_02" 0x71         ; Simple Input/Output
+27
+EndModule
+; ---------- 4 Word I/O ----------
+Module="WOp_04" 0x63           ; Simple Output
+18
+EndModule
+Module="WIp_04" 0x53           ; Simple Input
+23
+EndModule
+Module="WIpOp_04" 0x73         ; Simple Input/Output
+28
+EndModule
+; ---------- 8 Word I/O ----------
+Module="WOp_08" 0x67           ; Simple Output
+19
+EndModule
+Module="WIp_08" 0x57           ; Simple Input
+24
+EndModule
+Module="WIpOp_08" 0x77         ; Simple Input/Output
+29
+EndModule
+; ---------- 16 Word I/O ----------
+Module="WOp_16" 0x6F           ; Simple Output
+20
+EndModule
+Module="WIp_16" 0x5F           ; Simple Input
+25
+EndModule
+Module="WIpOp_16" 0x7F         ; Simple Input/Output
+30
+EndModule
+
+;eof
