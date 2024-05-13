@@ -23,8 +23,8 @@ from sklearn.metrics import mean_squared_error
 from sysidentpy.utils.save_load import save_model, load_model
 #%%
 
-data = pd.read_csv('C:/Users/toma/VEAS SELVKOST AS/Torbjørns Masteroppgave - General/Interpolation/SprangresponsData_mTS.csv', delimiter=';')
-data = data.drop(['Time', 'TRS5_RV01'], axis=1) #, 'PHA18_SED18_QB01'  'TRS5_FT01', 'TRS5_FT02', 'FOR_QT03', 'PHA18_SED18_QB01', 'TRS5_FT02', 'FOR_QT03', 'TRS5_SI01'
+data = pd.read_csv('Place where CSV is stored', delimiter=';')
+data = data.drop(['Time'], axis=1) #, 'PHA18_SED18_QB01'  'TRS5_FT01', 'TRS5_FT02', 'FOR_QT03', 'PHA18_SED18_QB01', 'TRS5_FT02', 'FOR_QT03', 'TRS5_SI01'
 
 # Assuming df is your original DataFrame
 total_rows = len(data)
@@ -33,13 +33,13 @@ split_index = int(0.9 * total_rows)
 
 # Select the first 90% for df_train
 df_train = data.iloc[:split_index]
-y_train = ((df_train.QB01).to_numpy()).reshape(-1, 1)
-x_train = (df_train.drop(['QB01'], axis=1)).to_numpy()
+y_train = ((df_train.u).to_numpy()).reshape(-1, 1)
+x_train = (df_train.drop(['u'], axis=1)).to_numpy()
 
 # Select the remaining 10% 'for df_test
-df_test = data#.iloc[split_index:]
-y_test = ((df_test.QB01).to_numpy()).reshape(-1, 1)
-x_test = (df_test.drop(['QB01'], axis=1)).to_numpy()
+df_test = data.iloc[split_index:]
+y_test = ((df_test.u).to_numpy()).reshape(-1, 1)
+x_test = (df_test.drop(['u'], axis=1)).to_numpy()
 
 #y_test = (y_test[:17999])
 #x_test=x_test[:17999]
@@ -49,26 +49,33 @@ x_test[:,3]= x_test[:,3]*0.14
 #x_train = x_train[:,3]*0.13*100
 #x_test = x_test[:,3]*0.13*100
 
-label = ['QT03', 'FT01', 'FT02', 'POL', 'SED18-QI01', 'QB02']
+label = ['DS_in [%DS]', 'Q_in [l/s]', 'Q_w [l/s]', 'u [l/s]', 'f_T [FTU]', 'DS_out [%DS]']
 
 plt.subplot(2,2,1)
 plt.plot(y_train,
           label='Train data')
 plt.legend()
+plt.ylabel('Output [%DS]')
 plt.subplot(2,2,2)
 for i in range(4):
     plt.plot(x_train[:,i], label=label[i])
 plt.legend()
+plt.ylabel('Inputs')
 
 plt.subplot(2,2,3)
 plt.plot(y_test,
           label='Test data')
 plt.legend()
+plt.ylabel('Output [%DS]')
+plt.xlabel('Time')
 plt.subplot(2,2,4)
 for i in range(4):
     plt.plot(x_test[:,i], label=label[i])
 
 plt.legend()
+plt.xlabel('Time')
+plt.ylabel('Inputs')
+
 
 plt.show()
 
